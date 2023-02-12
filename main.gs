@@ -11,7 +11,7 @@ function dataManipulationAlgorithm() {
   let answersScore_Arr = sheetSettings.getRange("K2:L").getValues().filter(item => item[0] != '');
   let amswersScore_List = new Map(answersScore_Arr);
   let numberOfAnswerToMultiplicate = sheetSettings.getRange("J3").getValue().toString().split(',');
-  let answersResults_F1 = sheetResponses.getRange(answersRange_F1[0]+lr+":"+answersRange_F1[1]+lr).getValues()[0];
+  let answersResults_F1 = sheetResponses.getRange(getStringRange(answersSettingsRange_F1, lr)).getValues()[0];
   Logger.log(answersResults_F1.length)
   let sum_F1 = 0;
   let reg = /.*\(/gi;
@@ -31,14 +31,24 @@ function dataManipulationAlgorithm() {
 
 }
 
-function getFirstAndLastColumnArr() {
 
+/**
+ * Функция возвращает строку с указание диапазона в котором ищем ответы 
+ * @param {string} answersSettingsRange_F1 диапазон с строкой диапазона поиска ответов (Пример: "F-AG")
+ * @param {number} lr номер последней строки из листа с ответами
+ * @return {string} strRange строка готовая для вставки в .getRange(). (Пример: "F3:AG3")
+ */
+function getStringRange(answersSettingsRange_F1, lr) {
+  let string = answersSettingsRange_F1.getValue();
+  let [firstCol, lastCol] = getSeparatedArray(string);
+  let strRange = firstCol+lr+":"+lastCol+lr;
+  return strRange;
 }
 
 /**
  * Возвращает массив где каждая ячейка результат разделения строки сепаратором (сепараторы:",", "-"", ";"")
- * @param {string} строка для сепарации
- * @return {Array} массив, где значение каждой ячейки результат сепарации строки
+ * @param {string} string строка для сепарации
+ * @return {Array} resArr массив, где значение каждой ячейки результат сепарации строки
  */
 function getSeparatedArray(string) {
   let separator = string.match(/,|-|;/gi)[0];
