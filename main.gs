@@ -9,10 +9,16 @@ const answersSettingsRange_F3 = sheetSettings.getRange('G4');
 function dataManipulationAlgorithm() {
 
   let lr = sheetResponses.getLastRow();
-  Logger.log("LAST ROW: " + lr)
   let multiplicator = sheetSettings.getRange('J2').getValue();
-  let answersScore_Arr = sheetSettings.getRange('K2:L').getValues().filter(item => item[0] != '');
-  let amswersScore_List = new Map(answersScore_Arr);
+  let answersScore_Arr = sheetSettings.getRange('K2:L5').getValues().filter(item => item[0] != '');
+  let answersScore_List = new Map(answersScore_Arr);
+  let reversedAnswersScoreRightColumn_Arr = sheetSettings.getRange('L2:L5').getValues().reverse();
+  let answersScoreLefttColumn_Arr = sheetSettings.getRange('K2:K5').getValues();
+  let reversedAnswersScore_Arr = [];
+  answersScoreLefttColumn_Arr.map((item, index) => {
+      reversedAnswersScore_Arr.push([item.toString(),reversedAnswersScoreRightColumn_Arr[index].toString()]);
+  })
+  let reversedAnswersScore_List = new Map(reversedAnswersScore_Arr);
   let numberOfAnswerToMultiplicate = sheetSettings.getRange('J3').getValue().toString().split(',');
   let answersResults_F1 = sheetResponses.getRange(getStringRange(answersSettingsRange_F1, lr)).getValues()[0];
   let sum_F1 = 0;
@@ -22,12 +28,12 @@ function dataManipulationAlgorithm() {
     let answersResults_F1_SearchPhrase = answersResults_F1[i].toString().match(reg)[0];
     answersResults_F1_SearchPhrase = answersResults_F1_SearchPhrase.substring(0, answersResults_F1_SearchPhrase.length - 2);
     if (numberOfAnswerToMultiplicate.find(item => item == i + 1) != undefined) {
-      sum_F1 += amswersScore_List.get(answersResults_F1_SearchPhrase) * multiplicator;
+      sum_F1 +=  Number(reversedAnswersScore_List.get(answersResults_F1_SearchPhrase));
     } else {
-      sum_F1 += amswersScore_List.get(answersResults_F1_SearchPhrase);
+      sum_F1 += Number(answersScore_List.get(answersResults_F1_SearchPhrase));
     }
   }
-
+Logger.log(sum_F1)
   let firstPartTextRange = 'O1';
   let valuesRange_F1 = 'M2:O5';
   let responseTextToClientOn_F1 = getTetxMessageForSlelectedScoreResult(firstPartTextRange, valuesRange_F1, sum_F1);
@@ -37,28 +43,28 @@ function dataManipulationAlgorithm() {
   let avgOfAnswers_f2 = getAverage(answersResults_F2);
   let valueNumAnswToCalculateDiapason_F2 = sheetSettings.getRange('M6:O8').getValues();
   let responseTextToClientOn_F2 = getTextSelectionResult(valueNumAnswToCalculateDiapason_F2, avgOfAnswers_f2);
-  
+
   // Форма 2 Главній ответ
   responseTextToClientOn_F2 = getReplacetStringText(responseTextToClientOn_F2, '{score}', avgOfAnswers_f2);
 
   let avgAwarenessOfDreamingScore = getArrOfAnswerToCalculate("J4", answersResults_F2);
   //Текст для отправки  Awareness Dreaming
-  let awarenessOfDreamingScoreText = getReplacetStringText(sheetSettings.getRange("I4").getValue(),'{score}', avgAwarenessOfDreamingScore );
+  let awarenessOfDreamingScoreText = getReplacetStringText(sheetSettings.getRange("I4").getValue(), '{score}', avgAwarenessOfDreamingScore);
   let avgOfDayDreamingScore = getArrOfAnswerToCalculate("J5", answersResults_F2);
   //Текст для отправки  Day Dreaming
-  let dayDreamingScoreText = getReplacetStringText(sheetSettings.getRange("I5").getValue(),'{score}', avgOfDayDreamingScore );
+  let dayDreamingScoreText = getReplacetStringText(sheetSettings.getRange("I5").getValue(), '{score}', avgOfDayDreamingScore);
   let avgOfDreamSensationsScore = getArrOfAnswerToCalculate("J6", answersResults_F2);
   //Текст для отправки  Day Dreaming
-  let dreamSensationsScoreText = getReplacetStringText(sheetSettings.getRange("I6").getValue(),'{score}', avgOfDreamSensationsScore);
+  let dreamSensationsScoreText = getReplacetStringText(sheetSettings.getRange("I6").getValue(), '{score}', avgOfDreamSensationsScore);
   let avgOfDejaStatesScore = getArrOfAnswerToCalculate("J7", answersResults_F2);
   //Текст для отправки  Day Dreaming
-  let dejaStatesScoreText = getReplacetStringText(sheetSettings.getRange("I7").getValue(),'{score}', avgOfDejaStatesScore);
+  let dejaStatesScoreText = getReplacetStringText(sheetSettings.getRange("I7").getValue(), '{score}', avgOfDejaStatesScore);
   let avgOfComprehensibilityScore = getArrOfAnswerToCalculate("J8", answersResults_F2);
   //Текст для отправки  Day Dreaming
-  let comprehensibilityScoreText = getReplacetStringText(sheetSettings.getRange("I8").getValue(),'{score}', avgOfComprehensibilityScore);
+  let comprehensibilityScoreText = getReplacetStringText(sheetSettings.getRange("I8").getValue(), '{score}', avgOfComprehensibilityScore);
   let avgOfIntensityOfSensesScore = getArrOfAnswerToCalculate("J9", answersResults_F2);
   //Текст для отправки  Day Dreaming
-  let intensityOfSensesScoreText = getReplacetStringText(sheetSettings.getRange("I9").getValue(),'{score}', avgOfIntensityOfSensesScore);
+  let intensityOfSensesScoreText = getReplacetStringText(sheetSettings.getRange("I9").getValue(), '{score}', avgOfIntensityOfSensesScore);
 
 
   let answersResults_F3 = sheetResponses.getRange(getStringRange(answersSettingsRange_F3, lr)).getValues()[0]
@@ -131,35 +137,35 @@ function sendMail(arrMessage) {
     .setName('jasper1URL');
   let message =
     `<!DOCTYPE html><html><body><h1>${clientName}, below is the detailed information that we received by processing the form</h1><p></p>` +
-    '<H3>Sleep Quality Questionnaire (SQS)</H3>'+
-    `<p>${responseTextToClientOn_F1}</p>`+
-    '<H3>Dream Questionnaire (ICP Horton)</H3>'+
-    `<p>${responseTextToClientOn_F2}</p>`+
-    '<ul>'+
+    '<H3>Sleep Quality Questionnaire (SQS)</H3>' +
+    `<p>${responseTextToClientOn_F1}</p>` +
+    '<H3>Dream Questionnaire (ICP Horton)</H3>' +
+    `<p>${responseTextToClientOn_F2}</p>` +
+    '<ul>' +
     `<li>${awarenessOfDreamingScoreText}</li>` +
     `<li>${dayDreamingScoreText}</li>` +
     `<li>${dreamSensationsScoreText}</li>` +
     `<li>${dejaStatesScoreText}</li>` +
     `<li>${comprehensibilityScoreText}</li>` +
     `<li>${intensityOfSensesScoreText}</li></ul>` +
-    '<H3>Lucid Dreaming Questionnaire (LUSK)</H3>'+
-    `<p>${responseTextToClientOn_F3}</p>`+
+    '<H3>Lucid Dreaming Questionnaire (LUSK)</H3>' +
+    `<p>${responseTextToClientOn_F3}</p>` +
     '<img src="cid:jasper1URL" alt="asper 1" width="220">' +
     '</body></html>'
   Logger.log(clientEmail)
   GmailApp.sendEmail(
-    clientEmail, 
+    clientEmail,
     `${clientName}, the answer to the survey you just completed is in this email`,
-    `${clientName}, below is the detailed information that we received by processing the form \n`+
-    `${responseTextToClientOn_F1} \n ${responseTextToClientOn_F2} \n `+
-    `${awarenessOfDreamingScoreText} \n ${dayDreamingScoreText} \n ${dreamSensationsScoreText} \n ${dejaStatesScoreText} \n ${comprehensibilityScoreText} \n ${intensityOfSensesScoreText} \n ${responseTextToClientOn_F3}`, 
+    `${clientName}, below is the detailed information that we received by processing the form \n` +
+    `${responseTextToClientOn_F1} \n ${responseTextToClientOn_F2} \n ` +
+    `${awarenessOfDreamingScoreText} \n ${dayDreamingScoreText} \n ${dreamSensationsScoreText} \n ${dejaStatesScoreText} \n ${comprehensibilityScoreText} \n ${intensityOfSensesScoreText} \n ${responseTextToClientOn_F3}`,
     {
-    htmlBody: message,
-    inlineImages:
-    {
-      jasper1URL: jasper1
-    }
-  });
+      htmlBody: message,
+      inlineImages:
+      {
+        jasper1URL: jasper1
+      }
+    });
 }
 
 /**
@@ -232,7 +238,7 @@ function getArrOfAnswerToCalculate(range, answersResults_F2) {
   // Массив с ответами
   let arrOfAnswToCalToCalculate = [];
   arrOfDaysToCalculate.map(item => {
-    arrOfAnswToCalToCalculate.push(answersResults_F2[item-1]);
+    arrOfAnswToCalToCalculate.push(answersResults_F2[item - 1]);
   })
   let resAvg = getAverage(arrOfAnswToCalToCalculate);
   return resAvg;
